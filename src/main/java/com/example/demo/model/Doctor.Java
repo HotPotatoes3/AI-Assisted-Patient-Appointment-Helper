@@ -12,20 +12,35 @@ public class Doctor {
     private String name;
     private String specialty;
 
-    public Doctor() {}
+    public Doctor() {
+    }
+
+    public Doctor(Long id) {
+        this.id = id;
+    }
 
     public Doctor(String name, String specialty) {
         this.name = name;
         this.specialty = specialty;
     }
 
-    public Long getId() { return id; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getName() { return name; }
+    public String getName() {
+        return name;
+    }
 
-    public String getSpecialty() { return specialty; }
+    public String getSpecialty() {
+        return specialty;
+    }
 
-    public void setName(String name) { this.name = name; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public void setSpecialty(String specialty) { this.specialty = specialty; }
+    public void setSpecialty(String specialty) {
+        this.specialty = specialty;
+    }
 }
