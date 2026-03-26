@@ -42,6 +42,14 @@ public class DoctorController {
         doctorService.saveDoctor(doctor);
     }
 
+
+    //API #4
+    // This API gets a doctor by their ID, which is provided as a path variable in the URL. It returns the doctor object if found, or null if not found.
+    @GetMapping("/{id}")
+    public Doctor getDoctorById(@PathVariable Long id) {
+        return doctorService.getDoctorById(id);
+    }
+
     @DeleteMapping("/delete")
     void deleteDoctors() {
         // this would delete

@@ -20,6 +20,13 @@ public class DoctorService {
         return doctorRepository.findAll();
     }
 
+    public Doctor getDoctorById(Long id) {
+        if (id == null) {
+            return null;
+        }
+        return doctorRepository.findById(id).orElse(null);
+    }
+
     public List<Doctor> findBySpecialty(String specialty) {
         if (specialty == null || specialty.trim().isEmpty()) return List.of();
         return doctorRepository.findBySpecialty(specialty.trim());
