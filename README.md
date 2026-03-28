@@ -51,12 +51,61 @@
 
 ## How to Run Backend
 
+The backend supports two database configurations:
+
+### Option 1: Run with Embedded H2 Database (Default - No Setup Required)
+
+H2 is an in-memory database that requires no external setup. Perfect for development and testing.
+
 1. Build:
    - `./gradlew clean build`
 2. Run:
    - `./gradlew bootRun`
-3. Default port:
+3. Access backend:
    - `http://localhost:8080`
+4. View H2 console (optional):
+   - `http://localhost:8080/h2-console`
+   - JDBC URL: `jdbc:h2:mem:patientdb`
+   - Username: `sa`
+   - Password: (leave blank)
+
+**Note:** Data is reset when the application restarts.
+
+### Option 2: Run with MySQL Database (Requires Docker)
+
+For persistent data storage using MySQL in a Docker container.
+
+1. Start MySQL:
+   ```bash
+   docker run --name mysql-patient -e MYSQL_ROOT_PASSWORD=root -p 3306:3306 -d mysql:8.0
+   ```
+
+2. Create database and user:
+   ```bash
+   docker exec mysql-patient mysql -u root -proot -e "CREATE DATABASE patientdb; CREATE USER 'myuser'@'%' IDENTIFIED BY 'mypassword'; GRANT ALL PRIVILEGES ON patientdb.* TO 'myuser'@'%'; FLUSH PRIVILEGES;"
+   ```
+
+3. Build and run with MySQL profile:
+   ```bash
+   ./gradlew clean build
+   ./gradlew bootRun --args='--spring.profiles.active=mysql'
+   ```
+
+4. Access backend:
+   - `http://localhost:8080`
+
+**Switching Profiles Programmatically:**
+
+Set the environment variable before running:
+```bash
+# On PowerShell:
+$env:SPRING_PROFILES_ACTIVE = "mysql"
+./gradlew bootRun
+
+# On Linux/Mac:
+export SPRING_PROFILES_ACTIVE=mysql
+./gradlew bootRun
+```
 
 ---
 
@@ -72,9 +121,9 @@
 
 ## Current Status
 
-- [x] Backend: implemented & connected to MySQL database
+- [x] Backend: implemented with flexible database support (H2 or MySQL)
 - [x] Frontend (React): implemented & running on port 3000
-- [x] Database: MySQL 8.0 (Docker container setup)
+- [x] Database: H2 embedded (default) or MySQL 8.0 (optional Docker container)
 - [x] API integration: backend and frontend communicating
 - [ ] Deploy/production readiness: pending final testing & deployment config
 
@@ -90,7 +139,9 @@
 6. Deploy to production (cloud host, containerization)
 
 ---
-## Database Setup (MySQL with Docker)
+## Database Setup (MySQL with Docker - Optional)
+
+The application uses **H2 embedded database by default** and requires no setup. If you prefer persistent data storage with MySQL, follow the steps below.
 
 ### Prerequisites
 - Docker installed and running
@@ -111,6 +162,12 @@ docker exec mysql-patient mysql -u root -proot -e "CREATE DATABASE patientdb; CR
 
 ```bash
 docker exec mysql-patient mysql -u myuser -pmypassword patientdb -e "SELECT 1"
+```
+
+### Run Backend with MySQL
+
+```bash
+./gradlew bootRun --args='--spring.profiles.active=mysql'
 ```
 
 ---
@@ -138,7 +195,10 @@ A React frontend has been scaffolded under `frontend/` with the following utilit
 
 ## Notes
 
-- Backend uses MySQL 8.0 (Docker) for persistent data storage
+- **Database Flexibility**: Backend supports both H2 (embedded, default) and MySQL (Docker, optional)
+  - H2: No setup required, perfect for development/testing. Data resets on restart.
+  - MySQL: Requires Docker. Use for persistent data in production.
+- Spring Boot profiles (`application-h2.properties` and `application-mysql.properties`) handle database switching
 - Spring Boot DevTools enabled for hot reload during development
 - React frontend communicates with backend via REST API
 - Keep expanding `service` and `controller` as more domain requirements appear
