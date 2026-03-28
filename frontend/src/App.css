@@ -1,0 +1,150 @@
+.app-container {
+  max-width: 980px;
+  margin: 2rem auto;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #1d1d1d;
+}
+
+h1 {
+  text-align: center;
+  color: #155abc;
+}
+
+.panel {
+  background: #f9f9fb;
+  border: 1px solid #ddd;
+  margin-bottom: 1.2rem;
+  padding: 1rem;
+  border-radius: 6px;
+}
+
+.doctor-form {
+  display: grid;
+  gap: 1.2rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin-bottom: 0.35rem;
+  color: #333;
+}
+
+.required {
+  color: #d32f2f;
+  margin-left: 0.2rem;
+}
+
+.doctor-form input {
+  padding: 0.65rem;
+  border-radius: 5px;
+  border: 1px solid #bbb;
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease;
+}
+
+.doctor-form input:focus {
+  outline: none;
+  border-color: #155abc;
+  box-shadow: 0 0 0 3px rgba(21, 90, 188, 0.1);
+}
+
+.doctor-form input:disabled {
+  background-color: #f0f0f0;
+  cursor: not-allowed;
+}
+
+.doctor-form input.input-error {
+  border-color: #d32f2f;
+  background-color: #fff5f5;
+}
+
+.error-text {
+  color: #d32f2f;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.form-message {
+  padding: 0.8rem;
+  border-radius: 5px;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.form-message.success {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border-left: 4px solid #2e7d32;
+}
+
+.form-message.error {
+  background-color: #ffebee;
+  color: #c62828;
+  border-left: 4px solid #c62828;
+}
+
+.btn-submit {
+  padding: 0.7rem 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.btn-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+button {
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 5px;
+  background: #155abc;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+button:hover {
+  background: #0f4f9f;
+}
+
+.filter-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.8rem;
+}
+
+.filter-row input {
+  flex: 1;
+}
+
+.message {
+  margin: 0.8rem 0;
+  color: #b3212b;
+}
+
+.doctor-list {
+  list-style: none;
+  padding: 0;
+}
+
+.doctor-item {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0.8rem;
+  margin-bottom: 0.6rem;
+  display: grid;
+  grid-template-columns: auto auto auto;
+  gap: 1rem;
+}
+
+.doctor-item strong {
+  font-size: 1.05rem;
+}

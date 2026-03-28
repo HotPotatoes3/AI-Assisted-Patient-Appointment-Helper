@@ -11,7 +11,7 @@
   - Spring Data JPA
   - Embedded DB (default config, could be H2)
 - Frontend:
-  - React app not yet completed (in development)
+  - React app completed (in development)
   - This repo currently covers only backend
 
 ---
@@ -72,25 +72,73 @@
 
 ## Current Status
 
-- [x] Backend: implemented
-- [ ] Frontend (React): in development
-- [ ] Deploy/production readiness: pending config and frontend completion
+- [x] Backend: implemented & connected to MySQL database
+- [x] Frontend (React): implemented & running on port 3000
+- [x] Database: MySQL 8.0 (Docker container setup)
+- [x] API integration: backend and frontend communicating
+- [ ] Deploy/production readiness: pending final testing & deployment config
 
 ---
 
 ## Next steps
 
-1. Finish React frontend and connect to backend API
-2. Add input validation for all endpoints
-3. Add OpenAPI/Swagger docs
-4. Add tests (unit, integration)
-5. Add security (JWT, role checks)
-6. Add persistence config (PostgreSQL or equivalent)
+1. Add input validation for all endpoints
+2. Add OpenAPI/Swagger docs
+3. Add unit & integration tests
+4. Add security (JWT, role-based access control)
+5. Add error handling & logging
+6. Deploy to production (cloud host, containerization)
+
+---
+## Database Setup (MySQL with Docker)
+
+### Prerequisites
+- Docker installed and running
+
+### Start MySQL Container
+
+```bash
+docker run --name mysql-patient -e MYSQL_ROOT_PASSWORD=root -p 3306:3306 -d mysql:8.0
+```
+
+### Create Database & User
+
+```bash
+docker exec mysql-patient mysql -u root -proot -e "CREATE DATABASE patientdb; CREATE USER 'myuser'@'%' IDENTIFIED BY 'mypassword'; GRANT ALL PRIVILEGES ON patientdb.* TO 'myuser'@'%'; FLUSH PRIVILEGES;"
+```
+
+### Verify Connection
+
+```bash
+docker exec mysql-patient mysql -u myuser -pmypassword patientdb -e "SELECT 1"
+```
+
+---
+## Frontend Setup (React)
+
+A React frontend has been scaffolded under `frontend/` with the following utilities:
+- `GET /api/doctors/all` (doctor list)
+- `GET /api/doctors/specialty/{specialty}` (filter by specialty)
+- `POST /api/doctors` (create new doctor)
+
+### Run Backend
+1. `.\gradlew.bat bootRun` (Windows PowerShell)
+   - Or `./gradlew bootRun` (WSL/Linux/Mac)
+2. Backend runs on `http://localhost:8080`
+3. API endpoints available at `/api/doctors/...`
+
+### Run Frontend
+1. `cd frontend`
+2. `npm install`
+3. `npm run dev`
+4. Frontend dev server runs on `http://localhost:3000`
+5. Frontend automatically proxies `/api` to `http://localhost:8080`
 
 ---
 
 ## Notes
 
-- For now, this repository is backend-first.
-- React UI is promised but not yet shipped.
-- Keep expanding `service` and `controller` as more domain requirements appear.
+- Backend uses MySQL 8.0 (Docker) for persistent data storage
+- Spring Boot DevTools enabled for hot reload during development
+- React frontend communicates with backend via REST API
+- Keep expanding `service` and `controller` as more domain requirements appear
