@@ -148,3 +148,99 @@ button:hover {
 .doctor-item strong {
   font-size: 1.05rem;
 }
+
+/* Navigation styles */
+.navigation {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  justify-content: center;
+}
+
+.nav-button {
+  padding: 0.7rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  background: #e0e0e0;
+  color: #333;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.nav-button:hover {
+  background: #d0d0d0;
+}
+
+.nav-button.active {
+  background: #155abc;
+  color: white;
+}
+
+/* Patient form and list styles */
+.patient-form {
+  display: grid;
+  gap: 1.2rem;
+}
+
+.patient-form input {
+  padding: 0.65rem;
+  border-radius: 5px;
+  border: 1px solid #bbb;
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease;
+}
+
+.patient-form input:focus {
+  outline: none;
+  border-color: #155abc;
+  box-shadow: 0 0 0 3px rgba(21, 90, 188, 0.1);
+}
+
+.patient-form input:disabled {
+  background-color: #f0f0f0;
+  cursor: not-allowed;
+}
+
+.patient-form input.input-error {
+  border-color: #d32f2f;
+  background-color: #fff5f5;
+}
+
+.submit-button {
+  padding: 0.7rem 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.submit-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.patient-list {
+  list-style: none;
+  padding: 0;
+}
+
+.patient-item {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0.8rem;
+  margin-bottom: 0.6rem;
+  display: grid;
+  grid-template-columns: auto auto auto;
+  gap: 1rem;
+  align-items: center;
+}
+
+.patient-item strong {
+  font-size: 1.05rem;
+}
+
+.patient-item span {
+  color: #666;
+  font-size: 0.95rem;
+}
