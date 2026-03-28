@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import DoctorForm from './DoctorForm';
 import PatientForm from './PatientForm';
+import AIAssistant from './AIAssistant';
 
 const API_BASE = import.meta.env.VITE_API_BASE || '/api';
 
@@ -139,6 +140,8 @@ function App() {
           </section>
         </>
       )}
+      
+      <AIAssistant />
     </div>
   );
 }
