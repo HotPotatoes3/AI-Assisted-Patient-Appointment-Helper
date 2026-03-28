@@ -19,7 +19,16 @@ export function AIAssistant() {
   const [error, setError] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
+  const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY as string;
+
+  // Debug effect to check initialization
+  useEffect(() => {
+    console.log('AIAssistant initialized');
+    console.log('API Key configured:', !!apiKey);
+    if (!apiKey) {
+      console.warn('Warning: OpenRouter API key not configured');
+    }
+  }, [apiKey]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -27,7 +36,7 @@ export function AIAssistant() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, isOpen]);
 
   const systemPrompt = `You are an AI Assistant for the AI-Assisted Patient Appointment Helper application. 
 Your role is to help users with:
@@ -45,13 +54,24 @@ Always ask for clarification if needed and maintain context across the conversat
         throw new Error('OpenRouter API key not configured. Please add VITE_OPENROUTER_API_KEY to your .env.local file.');
       }
 
-      const allMessages: Message[] = [
-        {
-          role: 'user',
-          content: systemPrompt,
-        },
-        ...userMessages,
-      ];
+      console.log('Calling OpenRouter API...');
+      console.log('Messages to send:', userMessages);
+
+      const requestBody = {
+        model: 'nvidia/nemotron-3-super-120b-a12b:free',
+        messages: [
+          {
+            role: 'system',
+            content: systemPrompt,
+          },
+          ...userMessages,
+        ],
+        reasoning: { enabled: true, type: 'enabled' },
+        temperature: 0.7,
+        max_tokens: 1000,
+      };
+
+      console.log('Request body:', requestBody);
 
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
@@ -61,28 +81,66 @@ Always ask for clarification if needed and maintain context across the conversat
           'HTTP-Referer': window.location.origin,
           'X-Title': 'Patient Appointment Helper',
         },
-        body: JSON.stringify({
-          model: 'nvidia/nemotron-3-super-120b-a12b:free',
-          messages: allMessages,
-          reasoning: { enabled: true },
-          temperature: 0.7,
-          max_tokens: 500,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
+      console.log('API Response status:', response.status);
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.message || `API error: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        console.error('API Error:', errorData);
+        throw new Error(
+          errorData.error?.message || 
+          `API error: ${response.status} ${response.statusText}`
+        );
       }
 
       const result = await response.json();
+      console.log('API Result:', result);
+      
+      if (!result.choices || !result.choices[0] || !result.choices[0].message) {
+        throw new Error('Invalid API response: no message content returned');
+      }
+
       const assistantMessage = result.choices[0].message;
 
+      // Extract content - handle both string and object responses
+      let content = '';
+      if (typeof assistantMessage.content === 'string') {
+        content = assistantMessage.content;
+      } else if (assistantMessage.content && typeof assistantMessage.content === 'object') {
+        // If it's an object with a 'text' property, use that
+        if (assistantMessage.content.text) {
+          content = assistantMessage.content.text;
+        } else {
+          // Otherwise stringify it
+          content = JSON.stringify(assistantMessage.content);
+        }
+      }
+
+      // Extract reasoning details - handle both string and object responses
+      let reasoning = undefined;
+      if (assistantMessage.reasoning_details) {
+        if (typeof assistantMessage.reasoning_details === 'string') {
+          reasoning = assistantMessage.reasoning_details;
+        } else if (typeof assistantMessage.reasoning_details === 'object') {
+          if (assistantMessage.reasoning_details.text) {
+            reasoning = assistantMessage.reasoning_details.text;
+          } else {
+            reasoning = JSON.stringify(assistantMessage.reasoning_details, null, 2);
+          }
+        }
+      }
+
+      console.log('Extracted content:', content);
+      console.log('Extracted reasoning:', reasoning);
+
       return {
-        content: assistantMessage.content,
-        reasoning_details: assistantMessage.reasoning_details,
+        content,
+        reasoning_details: reasoning,
       };
     } catch (err) {
+      console.error('callOpenRouterAPI error:', err);
       throw err;
     }
   };
@@ -96,42 +154,56 @@ Always ask for clarification if needed and maintain context across the conversat
       timestamp: new Date(),
     };
 
+    console.log('Sending message:', userMessage.content);
     setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
     setError('');
 
     try {
-      const messageHistory: Message[] = messages.map((msg) => ({
-        role: msg.role,
-        content: msg.content,
-        reasoning_details: msg.reasoning_details,
-      }));
+      // Build message history from all previous messages
+      const messageHistory: Message[] = messages.map((msg) => {
+        const msgObj: Message = {
+          role: msg.role,
+          content: msg.content,
+        };
+        if (msg.reasoning_details) {
+          msgObj.reasoning_details = msg.reasoning_details;
+        }
+        return msgObj;
+      });
       messageHistory.push({
         role: 'user',
         content: userMessage.content,
       });
 
+      console.log('Message history:', messageHistory);
       const assistantResponse = await callOpenRouterAPI(messageHistory);
+      console.log('API Response received:', assistantResponse);
 
       const assistantMessage: ChatMessage = {
         role: 'assistant',
         content: assistantResponse.content,
-        reasoning_details: assistantResponse.reasoning_details,
         timestamp: new Date(),
       };
+      if (assistantResponse.reasoning_details) {
+        assistantMessage.reasoning_details = assistantResponse.reasoning_details;
+      }
 
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to get response from AI assistant';
+      console.error('Error in handleSendMessage:', err);
       setError(errorMessage);
+      // Remove the user message if there was an error
+      setMessages((prev) => prev.slice(0, -1));
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
@@ -179,11 +251,17 @@ Always ask for clarification if needed and maintain context across the conversat
               messages.map((msg, index) => (
                 <div key={index} className={`ai-message-item ${msg.role}`}>
                   <div className="ai-message-role">{msg.role === 'user' ? 'You' : 'AI Assistant'}</div>
-                  <div className="ai-message-content">{msg.content}</div>
+                  <div className="ai-message-content">
+                    {typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content)}
+                  </div>
                   {msg.reasoning_details && (
                     <details className="ai-reasoning">
                       <summary>View reasoning</summary>
-                      <p>{msg.reasoning_details}</p>
+                      <p>
+                        {typeof msg.reasoning_details === 'string'
+                          ? msg.reasoning_details
+                          : JSON.stringify(msg.reasoning_details, null, 2)}
+                      </p>
                     </details>
                   )}
                 </div>
@@ -223,6 +301,12 @@ Always ask for clarification if needed and maintain context across the conversat
               {isLoading ? '...' : 'Send'}
             </button>
           </div>
+
+          {!apiKey && (
+            <div className="ai-message-error" style={{ margin: '12px', marginTop: '0' }}>
+              <strong>⚠️ API Key Missing:</strong> Add VITE_OPENROUTER_API_KEY to .env.local file
+            </div>
+          )}
         </div>
       )}
     </>
