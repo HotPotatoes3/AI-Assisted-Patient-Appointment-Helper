@@ -15,6 +15,7 @@ A full-stack web application for managing doctor and patient appointments with a
 **Key Features:**
 - 👨‍⚕️ Doctor management (list, create, filter by specialty)
 - 🧑‍⚕️ Patient management (register, view, manage appointments)
+- 📅 Appointment booking (book appointments with patients, doctors, time slots, and visit reasons)
 - 🤖 AI Assistant chatbot with real-time responses and reasoning explanations
 - ⚡ Dual database configuration (zero-setup H2 or persistent MySQL)
 - 🔄 Real-time API integration between frontend and backend
@@ -58,7 +59,8 @@ AI-Assisted-Patient-Appointment-Helper/
 ├── src/main/java/com/example/demo/          # Backend (Spring Boot)
 │   ├── controller/
 │   │   ├── DoctorController.java
-│   │   └── PatientController.java
+│   │   ├── PatientController.java
+│   │   └── AppointmentController.java
 │   ├── model/
 │   │   ├── Appointment.java
 │   │   ├── Doctor.java
@@ -69,7 +71,8 @@ AI-Assisted-Patient-Appointment-Helper/
 │   │   └── PatientRepository.java
 │   ├── service/
 │   │   ├── DoctorService.java
-│   │   └── PatientService.java
+│   │   ├── PatientService.java
+│   │   └── AppointmentService.java
 │   └── PatientAppointmentMain.java
 ├── frontend/                                  # Frontend (React)
 │   ├── src/
@@ -79,6 +82,7 @@ AI-Assisted-Patient-Appointment-Helper/
 │   │   ├── App.css
 │   │   ├── DoctorForm.jsx                   # Doctor registration
 │   │   ├── PatientForm.jsx                  # Patient registration
+│   │   ├── AppointmentForm.jsx              # Appointment booking
 │   │   ├── main.jsx
 │   │   ├── vite-env.d.ts                    # TypeScript config
 │   │   └── ...
@@ -222,10 +226,12 @@ npm run dev          # Start development server
 **Tab Navigation:**
 - **Doctors Tab**: View all doctors, filter by specialty, add new doctors
 - **Patients Tab**: View all patients, register new patients, manage patient info
+- **Appointments Tab**: Book new appointments, view all booked appointments
 
 **Components:**
 - `DoctorForm.jsx`: Create/register doctors
 - `PatientForm.jsx`: Register new patients with validation (name, email, phone)
+- `AppointmentForm.jsx`: Book appointments with patient/doctor selection and time slot entry
 - `AIAssistant.tsx`: AI chatbot with side panel UI
 - `App.jsx`: Main router and state management
 
@@ -320,7 +326,15 @@ curl http://localhost:8080/api/doctors/all
 | `POST` | `/api/patients` | Register new patient |
 | `PUT` | `/api/patients/{id}` | Update patient |
 | `DELETE` | `/api/patients/{id}` | Delete patient |
+### Appointment Endpoints
 
+| Method | Endpoint | Purpose |
+|--------|----------|----------|
+| `GET` | `/api/appointments/all` | Get all appointments |
+| `GET` | `/api/appointments/{id}` | Get appointment by ID |
+| `POST` | `/api/appointments` | Book new appointment |
+| `PUT` | `/api/appointments/{id}` | Update appointment |
+| `DELETE` | `/api/appointments/{id}` | Cancel appointment |
 **Example Patient Registration:**
 ```json
 POST /api/patients
@@ -330,6 +344,25 @@ Content-Type: application/json
   "name": "John Doe",
   "email": "john@example.com",
   "phoneNumber": "+1-555-0123"
+}
+```
+
+**Example Appointment Booking:**
+```json
+POST /api/appointments
+Content-Type: application/json
+
+{
+  "patientId": 1,
+  "patientName": "John Doe",
+  "doctorId": 1,
+  "doctor": {
+    "id": 1,
+    "name": "Dr. Smith",
+    "specialty": "Cardiology"
+  },
+  "timeSlot": "9:00 - 9:15",
+  "reason": "Annual checkup and blood pressure screening"
 }
 ```
 
@@ -456,8 +489,8 @@ Stop-Process -Process $proc -Force
 ### ✅ Completed
 - [x] Doctor management (CRUD operations)
 - [x] Patient management (registration and CRUD)
-- [x] Appointment model (structure in place)
-- [x] React frontend with tab navigation
+- [x] Appointment booking (full workflow with patient/doctor selection and time slots)
+- [x] React frontend with tab navigation (Doctors, Patients, Appointments)
 - [x] Form validation and error handling
 - [x] Dual database configuration (H2 + MySQL)
 - [x] AI Assistant chatbot with OpenRouter integration
@@ -466,7 +499,6 @@ Stop-Process -Process $proc -Force
 - [x] Browser-based debugging guide
 
 ### 🚧 In Progress
-- [ ] Full appointment booking workflow
 - [ ] Email notifications
 - [ ] User authentication and authorization
 - [ ] Role-based access control (doctor vs patient)

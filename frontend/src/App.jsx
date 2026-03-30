@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import DoctorForm from './DoctorForm';
 import PatientForm from './PatientForm';
+import AppointmentForm from './AppointmentForm';
 import AIAssistant from './AIAssistant';
 
 const API_BASE = import.meta.env.VITE_API_BASE || '/api';
@@ -9,6 +10,7 @@ function App() {
   const [currentPage, setCurrentPage] = useState('doctors');
   const [doctors, setDoctors] = useState([]);
   const [patients, setPatients] = useState([]);
+  const [appointments, setAppointments] = useState([]);
   const [specialtyFilter, setSpecialtyFilter] = useState('');
   const [message, setMessage] = useState('');
 
@@ -37,11 +39,27 @@ function App() {
     }
   };
 
+  const fetchAppointments = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/appointments/all`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      setAppointments(data);
+    } catch (error) {
+      setMessage(`Unable to fetch appointments: ${error.message}`);
+    }
+  };
+
   useEffect(() => {
     if (currentPage === 'doctors') {
       fetchDoctors();
-    } else {
+    } else if (currentPage === 'patients') {
       fetchPatients();
+    } else if (currentPage === 'appointments') {
+      // Fetch all necessary data for appointments page
+      fetchDoctors();
+      fetchPatients();
+      fetchAppointments();
     }
   }, [currentPage]);
 
@@ -51,6 +69,10 @@ function App() {
 
   const handlePatientAdded = () => {
     fetchPatients();
+  };
+
+  const handleAppointmentAdded = () => {
+    fetchAppointments();
   };
 
   const filterBySpecialty = (event) => {
@@ -79,6 +101,12 @@ function App() {
           onClick={() => setCurrentPage('patients')}
         >
           Patients
+        </button>
+        <button
+          className={`nav-button ${currentPage === 'appointments' ? 'active' : ''}`}
+          onClick={() => setCurrentPage('appointments')}
+        >
+          Appointments
         </button>
       </nav>
 
@@ -115,7 +143,7 @@ function App() {
             </ul>
           </section>
         </>
-      ) : (
+      ) : currentPage === 'patients' ? (
         <>
           <PatientForm onPatientAdded={handlePatientAdded} apiBase={API_BASE} />
 
@@ -135,6 +163,36 @@ function App() {
                 ))
               ) : (
                 <li>No patients found.</li>
+              )}
+            </ul>
+          </section>
+        </>
+      ) : (
+        <>
+          <AppointmentForm
+            onAppointmentAdded={handleAppointmentAdded}
+            apiBase={API_BASE}
+            patients={patients}
+            doctors={doctors}
+          />
+
+          <section className="panel">
+            <h2>Booked Appointments</h2>
+
+            {message && <p className="message">{message}</p>}
+
+            <ul className="appointment-list">
+              {appointments.length > 0 ? (
+                appointments.map((appointment) => (
+                  <li key={appointment.id} className="appointment-item">
+                    <strong>Patient:</strong> <span>{appointment.patientName}</span>
+                    <strong>Doctor:</strong> <span>{appointment.doctor?.name} ({appointment.doctor?.specialty})</span>
+                    <strong>Time Slot:</strong> <span>{appointment.timeSlot}</span>
+                    <strong>Reason:</strong> <span>{appointment.reason}</span>
+                  </li>
+                ))
+              ) : (
+                <li>No appointments booked yet.</li>
               )}
             </ul>
           </section>
